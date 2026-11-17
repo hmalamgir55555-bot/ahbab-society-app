@@ -336,6 +336,7 @@
     <button class="nav-btn" onclick="showPage('futureplan',this)">🚀 ফিউচার প্ল্যান</button>
     <button class="nav-btn" onclick="showPage('comments',this)">💬 মন্তব্য</button>
     <button class="nav-btn" onclick="showPage('messages',this)">📩 মেসেজ পাঠান</button>
+    <button class="nav-btn" id="nav-admins" style="display:none;" onclick="showPage('admins',this)">🛡️ অ্যাডমিন</button>
   </div>
 
   <!-- MEMBER NAV -->
@@ -343,6 +344,9 @@
     <button class="nav-btn active" onclick="showPage('my-profile',this)">👤 আমার প্রোফাইল</button>
     <button class="nav-btn" onclick="showPage('my-payments',this)">💰 আমার পেমেন্ট</button>
     <button class="nav-btn" onclick="showPage('my-receipts',this)">🧾 আমার রিসিট</button>
+    <button class="nav-btn" onclick="showPage('member-all-members',this)">👥 সব শেয়ারহোল্ডার</button>
+    <button class="nav-btn" onclick="showPage('member-all-payments',this)">📒 সব পেমেন্ট</button>
+    <button class="nav-btn" onclick="showPage('member-total-shares',this)">📈 সর্বমোট শেয়ার</button>
     <button class="nav-btn" onclick="showPage('member-policy',this)">📜 নীতিমালা</button>
     <button class="nav-btn" onclick="showPage('member-advisory',this)">🧭 উপদেষ্টা নির্দেশনা</button>
     <button class="nav-btn" onclick="showPage('member-meetings',this)">📅 মিটিং সময়সূচী</button>
@@ -406,6 +410,18 @@
     <div class="page" id="page-receipts">
       <div class="section-title">🧾 রিসিট দেখুন</div>
       <div id="receipt-container"><div class="empty" style="background:white;border-radius:14px;border:1px solid var(--border);"><div class="empty-icon">🧾</div><h3>পেমেন্ট লিস্ট থেকে রিসিট বাটনে ক্লিক করুন</h3></div></div>
+    </div>
+
+    <!-- Admin Management (Super Admin only) -->
+    <div class="page" id="page-admins">
+      <div class="section-title">🛡️ অ্যাডমিন ব্যবস্থাপনা</div>
+      <div style="background:#f0f9ff;border:1px solid #0ea5e9;border-radius:10px;padding:12px 14px;font-size:13px;color:#0369a1;margin-bottom:14px;">শুধু সুপার অ্যাডমিন নতুন অ্যাডমিন যোগ বা বাদ দিতে পারেন। নতুন অ্যাডমিন <strong>Google দিয়ে লগইন</strong> করলে পুরো অ্যাডমিনের সুবিধা পাবেন।</div>
+      <div style="background:white;border-radius:14px;border:1px solid var(--border);padding:20px;margin-bottom:16px;">
+        <h3 style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:12px;">➕ নতুন অ্যাডমিন যোগ করুন</h3>
+        <div class="form-group"><label>Gmail ঠিকানা *</label><input type="email" id="new-admin-email" placeholder="example@gmail.com"></div>
+        <div style="margin-top:12px;"><button class="btn btn-primary btn-sm" onclick="addAdmin()">অ্যাডমিন বানান</button></div>
+      </div>
+      <div id="admin-list"></div>
     </div>
 
     <!-- Security -->
@@ -571,6 +587,25 @@
     <div class="page" id="page-my-receipts">
       <div class="section-title">🧾 আমার রিসিট</div>
       <div id="my-receipt-container"><div class="empty" style="background:white;border-radius:14px;border:1px solid var(--border);"><div class="empty-icon">🧾</div><h3>পেমেন্ট লিস্ট থেকে রিসিট বাটনে ক্লিক করুন</h3></div></div>
+    </div>
+
+    <!-- Member: সব শেয়ারহোল্ডার (শুধু দেখা) -->
+    <div class="page" id="page-member-all-members">
+      <div class="section-title">👥 সব শেয়ারহোল্ডার</div>
+      <div class="members-grid" id="member-all-grid"></div>
+    </div>
+
+    <!-- Member: সব পেমেন্ট (শুধু দেখা) -->
+    <div class="page" id="page-member-all-payments">
+      <div class="section-title">📒 সব পেমেন্ট রেকর্ড</div>
+      <div class="card"><div class="table-wrap"><table><thead><tr><th>শেয়ারহোল্ডার</th><th>পরিমাণ</th><th>মাস/বছর</th><th>তারিখ</th><th>নোট</th><th>রিসিট</th></tr></thead><tbody id="member-all-payments-body"></tbody></table></div></div>
+    </div>
+
+    <!-- Member: সর্বমোট শেয়ার (শুধু দেখা) -->
+    <div class="page" id="page-member-total-shares">
+      <div class="section-title">📈 সর্বমোট শেয়ার</div>
+      <div class="card" id="m-total-shares-summary" style="padding:20px;"></div>
+      <div class="card" style="margin-top:12px;"><div class="table-wrap"><table><thead><tr><th>#</th><th>শেয়ারহোল্ডারের নাম</th><th>শেয়ার সংখ্যা</th><th>মোট জমা (৳)</th></tr></thead><tbody id="m-total-shares-tbody"></tbody></table></div></div>
     </div>
 
     <!-- Member Policy (Read-only) -->
@@ -818,8 +853,8 @@
     <div style="font-size:48px;margin-bottom:10px;">🤲</div>
     <div class="login-title">السلام عليكم!</div>
     <div style="font-size:14px;color:var(--text);line-height:1.8;margin:14px 0;">
-      আমাকে তৈরি করেছেন আমার গুরু <strong style="color:var(--primary);">আলমগীর</strong>। 😄<br>
-      আপনারা তাকে কেউ আর <strong>"আলে"</strong> ডাকবেন না! 🙅‍♂️<br><br>
+      আমাকে যিনি তৈরি করেছেন, আপনারা কি তাকে হাদিয়া দিয়েছেন?<br>
+      দিয়ে দিলে ভালো হতো না? 😆<br><br>
       সবাই ভালো থাকুন। ❤️
     </div>
     <button class="login-btn" onclick="closeWelcomePopup()">ঠিক আছে 👍</button>
@@ -860,6 +895,23 @@
 
   // ADMIN EMAILS - এখানে Admin এর ইমেইল যোগ করুন
   const ADMIN_EMAILS = ['hmalamgir55555@gmail.com', 'sayedbintaj27@gmail.com', 'jafarsadikrafi@gmail.com', 'nomansiddique8688@gmail.com'];
+  // সুপার অ্যাডমিন: শুধু এরাই অ্যাপ থেকে নতুন অ্যাডমিন যোগ/বাদ দিতে পারবেন (এখানে শুধু কোড বদলে পরিবর্তন করা যাবে)
+  const SUPER_ADMINS = ['hmalamgir55555@gmail.com'];
+  let dynamicAdmins = []; // অ্যাপ থেকে যোগ করা অ্যাডমিন (Firestore: admins)
+  let isSuperAdmin = false;
+
+  async function loadAdmins() {
+    try {
+      const snap = await getDocs(collection(db,'admins'));
+      dynamicAdmins = snap.docs.map(d => ({id:d.id, ...d.data()})).filter(a => a.email);
+    } catch(e) { console.error('admins load error', e); dynamicAdmins = []; }
+  }
+  function isAdminEmail(email) {
+    const e = (email||'').toLowerCase();
+    return SUPER_ADMINS.map(x=>x.toLowerCase()).includes(e)
+      || ADMIN_EMAILS.map(x=>x.toLowerCase()).includes(e)
+      || dynamicAdmins.some(a => (a.email||'').toLowerCase() === e);
+  }
 
   let members = [];
   let payments = [];
@@ -875,7 +927,9 @@
     document.getElementById('splash').classList.add('hidden');
     if (user) {
       currentUser = user;
-      const isAdmin = ADMIN_EMAILS.includes(user.email);
+      await loadAdmins();
+      const isAdmin = isAdminEmail(user.email);
+      isSuperAdmin = SUPER_ADMINS.map(x=>x.toLowerCase()).includes((user.email||'').toLowerCase());
       currentRole = isAdmin ? 'admin' : 'member';
       await loadData();
       setupUI();
@@ -944,7 +998,8 @@
       document.getElementById('admin-nav').style.display = 'flex';
       document.getElementById('member-nav').style.display = 'none';
       document.getElementById('backup-btn').style.display = 'block';
-      document.getElementById('role-badge').textContent = '👑 Admin';
+      document.getElementById('nav-admins').style.display = isSuperAdmin ? '' : 'none';
+      document.getElementById('role-badge').textContent = isSuperAdmin ? '👑 Super Admin' : '👑 Admin';
       document.getElementById('role-badge').className = 'role-badge role-admin';
       window.__replaceNext = true;
       showPage('dashboard', document.querySelector('#admin-nav .nav-btn'));
@@ -1137,6 +1192,10 @@
     if (p==='meetings') refreshLiveMeetingStatusAdmin();
     if (p==='member-meetings') refreshLiveMeetingStatusMember();
     if (p==='total-shares') renderTotalShares();
+    if (p==='admins') renderAdminList();
+    if (p==='member-all-members') renderMemberAllMembers();
+    if (p==='member-all-payments') renderMemberAllPayments();
+    if (p==='member-total-shares') renderTotalShares();
     if (fromHistory) currentPageId = p; else pushPageState(p);
   };
 
@@ -1157,10 +1216,10 @@
     window.showPage(pg, btn, true);
   });
 
-  function renderTotalShares() {
+  function renderTotalSharesInto(summaryId, tbodyId) {
     const totalShares = members.reduce((s,m)=>s+(parseInt(m.shares)||0),0);
     const totalAmount = payments.reduce((s,p)=>s+p.amount,0);
-    const summaryEl = document.getElementById('total-shares-summary');
+    const summaryEl = document.getElementById(summaryId);
     if(summaryEl) {
       summaryEl.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
@@ -1169,7 +1228,7 @@
           <div><div style="font-size:28px;font-weight:800;color:var(--accent)">${members.length}</div><div style="font-size:12px;color:var(--muted);margin-top:4px;">মোট সদস্য</div></div>
         </div>`;
     }
-    const tbody = document.getElementById('total-shares-tbody');
+    const tbody = document.getElementById(tbodyId);
     if(!tbody) return;
     if(!members.length){ tbody.innerHTML='<tr><td colspan="4"><div class="empty"><h3>কোনো সদস্য নেই</h3></div></td></tr>'; return; }
     const sorted = [...members].sort((a,b)=>(parseInt(b.shares)||0)-(parseInt(a.shares)||0));
@@ -1182,6 +1241,31 @@
         <td><strong>${m.shares||0}</strong></td>
         <td>৳${total.toLocaleString('bn-BD')}</td>
       </tr>`;
+    }).join('');
+  }
+
+  function renderTotalShares() {
+    renderTotalSharesInto('total-shares-summary','total-shares-tbody');
+    renderTotalSharesInto('m-total-shares-summary','m-total-shares-tbody');
+  }
+
+  // সদস্যদের জন্য শুধু-দেখার তালিকা (এডিট/মুছার বাটন নেই)
+  function renderMemberAllMembers() {
+    const grid = document.getElementById('member-all-grid'); if(!grid) return;
+    if(!members.length){ grid.innerHTML='<div class="empty" style="background:white;border-radius:14px;border:1px solid var(--border);grid-column:1/-1"><div class="empty-icon">👥</div><h3>কোনো সদস্য নেই</h3></div>'; return; }
+    grid.innerHTML = members.map(m=>{
+      const total = payments.filter(p=>p.memberId===m.id).reduce((s,p)=>s+p.amount,0);
+      const av = m.photo?`<img src="${m.photo}" alt="${m.name}">`:m.name[0];
+      return `<div class="member-card"><div class="mc-avatar">${av}</div><div class="mc-name">${m.name}</div><div class="mc-phone">📞 ${m.phone||'-'}</div><div class="mc-shares">📊 ${m.shares} শেয়ার</div><div class="mc-total">৳${total.toLocaleString('bn-BD')}</div><div style="font-size:10px;color:var(--muted);">মোট জমা</div><div class="mc-actions"><button class="btn btn-sm btn-outline" onclick="openProfile('${m.id}')">👤 প্রোফাইল</button></div></div>`;
+    }).join('');
+  }
+
+  function renderMemberAllPayments() {
+    const tbody = document.getElementById('member-all-payments-body'); if(!tbody) return;
+    if(!payments.length){ tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-icon">💰</div><h3>কোনো পেমেন্ট নেই</h3></div></td></tr>'; return; }
+    tbody.innerHTML = [...payments].reverse().map(p=>{
+      const m = members.find(x=>x.id===p.memberId);
+      return `<tr><td><div class="member-info">${avatarHTML(m)}<div class="member-name">${m?m.name:'অজানা'}</div></div></td><td><strong style="color:var(--success)">৳${p.amount.toLocaleString('bn-BD')}</strong></td><td>${p.month} ${p.year}</td><td>${p.date||''}</td><td style="font-size:11px;color:var(--muted)">${p.note||'-'}</td><td><button class="btn btn-sm btn-success" onclick="showReceipt('${p.id}','member')">🧾</button></td></tr>`;
     }).join('');
   }
 
@@ -1232,9 +1316,11 @@
     document.getElementById('ps-shares').textContent = m.shares;
     document.getElementById('ps-payments').textContent = mPay.length;
     document.getElementById('ps-total').textContent = '৳'+total.toLocaleString('bn-BD');
-    const infos = [{label:'ফোন',val:m.phone||'-'},{label:'ইমেইল',val:m.email||'-'},{label:'NID',val:m.nid||'-'},{label:'পেশা',val:m.profession||'-'},{label:'ঠিকানা',val:m.address||'-'},{label:'মাসিক জমা',val:m.monthly?'৳'+m.monthly:'-'}];
+    const canSeePrivate = currentRole==='admin' || (typeof currentMemberData!=='undefined' && currentMemberData && currentMemberData.id===id);
+    const infosAll = [{label:'ফোন',val:m.phone||'-'},{label:'ইমেইল',val:m.email||'-'},{label:'NID',val:m.nid||'-'},{label:'পেশা',val:m.profession||'-'},{label:'ঠিকানা',val:m.address||'-'},{label:'মাসিক জমা',val:m.monthly?'৳'+m.monthly:'-'}];
+    const infos = canSeePrivate ? infosAll : infosAll.filter(i => i.label !== 'ইমেইল' && i.label !== 'NID');
     document.getElementById('profile-info-grid').innerHTML = infos.map(i=>`<div class="p-info-item"><div class="p-info-label">${i.label}</div><div class="p-info-val">${i.val}</div></div>`).join('');
-    document.getElementById('profile-payments-list').innerHTML = mPay.length?[...mPay].reverse().map(p=>`<div class="p-pay-row"><span>📅 ${p.month} ${p.year}${p.note?' · '+p.note:''}</span><span>৳${p.amount.toLocaleString('bn-BD')}</span></div>`).join(''):'<div style="text-align:center;padding:14px;color:var(--muted);font-size:13px;">কোনো পেমেন্ট নেই</div>';
+    document.getElementById('profile-payments-list').innerHTML = mPay.length?[...mPay].reverse().map(p=>`<div class="p-pay-row"><span>📅 ${p.month} ${p.year}${p.note?' · '+p.note:''}</span><span>৳${p.amount.toLocaleString('bn-BD')}${currentRole==='admin'?` <button class="btn btn-sm btn-danger" style="padding:3px 8px;margin-left:6px;" onclick="deletePayment('${p.id}')">🗑️</button>`:''}</span></div>`).join(''):'<div style="text-align:center;padding:14px;color:var(--muted);font-size:13px;">কোনো পেমেন্ট নেই</div>';
     // Show edit button only for admin
     document.getElementById('profile-edit-btn-wrap').style.display = currentRole==='admin' ? 'block' : 'none';
     document.getElementById('profile-backdrop').classList.add('open');
@@ -1425,8 +1511,33 @@
     const tbody=document.getElementById('payments-table-body');
     if(!tbody)return;
     if(!payments.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty"><div class="empty-icon">💰</div><h3>কোনো পেমেন্ট নেই</h3></div></td></tr>';return;}
-    tbody.innerHTML=[...payments].reverse().map(p=>{const m=members.find(m=>m.id===p.memberId);return`<tr><td><div class="member-info">${avatarHTML(m)}<div class="member-name">${m?m.name:'অজানা'}</div></div></td><td><strong style="color:var(--success)">৳${p.amount.toLocaleString('bn-BD')}</strong></td><td>${p.month} ${p.year}</td><td>${p.date}</td><td style="font-size:11px;color:var(--muted)">${p.note||'-'}</td><td><button class="btn btn-sm btn-success" onclick="showReceipt('${p.id}','admin')">🧾</button></td><td><button class="btn btn-sm btn-outline" onclick="openEditPayment('${p.id}')">✏️ এডিট</button></td></tr>`;}).join('');
+    tbody.innerHTML=[...payments].reverse().map(p=>{const m=members.find(m=>m.id===p.memberId);return`<tr><td><div class="member-info">${avatarHTML(m)}<div class="member-name">${m?m.name:'অজানা'}</div></div></td><td><strong style="color:var(--success)">৳${p.amount.toLocaleString('bn-BD')}</strong></td><td>${p.month} ${p.year}</td><td>${p.date}</td><td style="font-size:11px;color:var(--muted)">${p.note||'-'}</td><td><button class="btn btn-sm btn-success" onclick="showReceipt('${p.id}','admin')">🧾</button></td><td><button class="btn btn-sm btn-outline" onclick="openEditPayment('${p.id}')">✏️ এডিট</button> <button class="btn btn-sm btn-danger" onclick="deletePayment('${p.id}')">🗑️</button></td></tr>`;}).join('');
   }
+
+  // পেমেন্ট মুছলে মোট জমাও কমে যায়, কারণ মোট জমা সবসময় পেমেন্টগুলোর যোগফল থেকে হিসাব হয়
+  window.deletePayment = async (id) => {
+    if (currentRole !== 'admin') return showToast('শুধু অ্যাডমিন পেমেন্ট মুছতে পারবেন!','error');
+    const p = payments.find(x => x.id === id); if (!p) return;
+    const m = members.find(x => x.id === p.memberId);
+    const msg = (m ? m.name : 'অজানা') + ' এর ' + p.month + ' ' + p.year + ' মাসের ৳' + p.amount + ' পেমেন্টটি মুছে ফেলবেন?\n\nএই টাকা মোট জমা থেকেও বাদ যাবে। মুছলে আর ফেরানো যাবে না।';
+    if (!confirm(msg)) return;
+    try {
+      await deleteDoc(doc(db,'payments',id));
+      payments = payments.filter(x => x.id !== id);
+      renderAll();
+      renderTotalShares();
+      const pb = document.getElementById('profile-backdrop');
+      if (pb && pb.classList.contains('open') && window.currentProfileId) openProfile(window.currentProfileId);
+      const rp = document.getElementById('page-receipts');
+      if (rp && rp.classList.contains('active')) {
+        document.getElementById('receipt-container').innerHTML = '<div class="empty" style="background:white;border-radius:14px;border:1px solid var(--border);"><div class="empty-icon">🗑️</div><h3>পেমেন্টটি মুছে ফেলা হয়েছে</h3></div>';
+      }
+      showToast('পেমেন্ট মুছে ফেলা হয়েছে, মোট জমা আপডেট হয়েছে ✅','success');
+    } catch(e) {
+      console.error(e);
+      showToast(e.code==='permission-denied' ? 'মুছার অনুমতি নেই (Firestore rules দেখুন)' : 'মুছতে সমস্যা: '+(e.code||e.message),'error');
+    }
+  };
 
   window.openEditPayment = (id) => {
     const p = payments.find(p=>p.id===id);
@@ -1558,7 +1669,7 @@
       </div>
       <div style="text-align:center;margin-top:14px;display:flex;gap:8px;justify-content:center;" class="no-print">
         <button class="btn btn-primary btn-sm" onclick="window.print()">🖨️ প্রিন্ট</button>
-        ${mode==='admin'?`<button class="btn btn-accent btn-sm" onclick="openEditPayment('${paymentId}')">✏️ এডিট</button>`:''}
+        ${mode==='admin'?`<button class="btn btn-accent btn-sm" onclick="openEditPayment('${paymentId}')">✏️ এডিট</button><button class="btn btn-danger btn-sm" onclick="deletePayment('${paymentId}')">🗑️ মুছুন</button>`:''}
       </div>`;
 
     if(mode==='admin'){
@@ -1616,8 +1727,54 @@
       <div>💵 মোট জমা: <strong>৳${totalFund.toLocaleString('bn-BD')}</strong></div>
       <div>🔒 স্টোরেজ: <strong style="color:var(--success)">Firebase Cloud ✅</strong></div>
       <div>🛡️ Auth: <strong style="color:var(--success)">Google Authentication ✅</strong></div>
-      <div>👑 Admin: <strong>${ADMIN_EMAILS.join(', ')}</strong></div>`;
+      <div>👑 Admin: <strong>${[...new Set([...SUPER_ADMINS, ...ADMIN_EMAILS, ...dynamicAdmins.map(a=>a.email)])].join(', ')}</strong></div>`;
   }
+
+  // ===== ADMIN MANAGEMENT (শুধু সুপার অ্যাডমিন) =====
+  function renderAdminList() {
+    const el = document.getElementById('admin-list'); if (!el) return;
+    if (!isSuperAdmin) { el.innerHTML = '<div class="empty"><h3>শুধু সুপার অ্যাডমিন এই অংশ দেখতে পারেন</h3></div>'; return; }
+    const row = (email, badge, removable) => `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 0;border-bottom:1px solid var(--border);">
+      <div style="min-width:0;"><div style="font-weight:600;font-size:14px;word-break:break-all;">${email}</div><div style="font-size:12px;color:var(--muted);">${badge}</div></div>
+      ${removable ? `<button class="btn btn-danger btn-sm" onclick="removeAdmin('${email}')">বাদ দিন</button>` : ''}</div>`;
+    const supers = SUPER_ADMINS.map(e => row(e, '👑 সুপার অ্যাডমিন', false)).join('');
+    const perm = ADMIN_EMAILS.filter(e => !SUPER_ADMINS.map(x=>x.toLowerCase()).includes(e.toLowerCase())).map(e => row(e, '🔒 স্থায়ী অ্যাডমিন (কোডে নির্ধারিত)', false)).join('');
+    const dyn = dynamicAdmins.map(a => row(a.email, '✅ যোগ করেছেন: ' + (a.addedBy||''), true)).join('');
+    el.innerHTML = `<div style="background:white;border-radius:14px;border:1px solid var(--border);padding:8px 20px;">${supers}${perm}${dyn || '<div style="padding:14px 0;font-size:13px;color:var(--muted);">অ্যাপ থেকে যোগ করা কোনো অ্যাডমিন এখনো নেই।</div>'}</div>`;
+  }
+
+  window.addAdmin = async () => {
+    if (!isSuperAdmin) return showToast('শুধু সুপার অ্যাডমিন এটা করতে পারেন!','error');
+    const input = document.getElementById('new-admin-email');
+    const email = (input.value || '').trim().toLowerCase();
+    if (!/^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/.test(email)) return showToast('সঠিক ইমেইল দিন!','error');
+    if (isAdminEmail(email)) return showToast('ইনি আগে থেকেই অ্যাডমিন!','error');
+    try {
+      const data = { email, addedBy: currentUser.email, addedAt: new Date().toISOString() };
+      await setDoc(doc(db,'admins',email), data);
+      dynamicAdmins.push({ id: email, ...data });
+      input.value = '';
+      renderAdminList(); renderDataStats();
+      showToast(email + ' এখন অ্যাডমিন ✅','success');
+    } catch(e) {
+      console.error(e);
+      showToast(e.code==='permission-denied' ? 'অনুমতি নেই (Firestore rules-এ admins যোগ করতে হবে)' : 'যোগ করতে সমস্যা: '+(e.code||e.message),'error');
+    }
+  };
+
+  window.removeAdmin = async (email) => {
+    if (!isSuperAdmin) return showToast('শুধু সুপার অ্যাডমিন এটা করতে পারেন!','error');
+    if (!confirm(email + ' কে অ্যাডমিন থেকে বাদ দিতে চান?')) return;
+    try {
+      await deleteDoc(doc(db,'admins',email));
+      dynamicAdmins = dynamicAdmins.filter(a => (a.email||'').toLowerCase() !== email.toLowerCase());
+      renderAdminList(); renderDataStats();
+      showToast('অ্যাডমিন বাদ দেওয়া হয়েছে','success');
+    } catch(e) {
+      console.error(e);
+      showToast('বাদ দিতে সমস্যা: '+(e.code||e.message),'error');
+    }
+  };
 
   window.closeModal = (id)=>document.getElementById(id).classList.remove('open');
 
@@ -1627,9 +1784,17 @@
     if (sessionStorage.getItem(key)) return;
     document.getElementById('welcome-backdrop').classList.add('open');
     sessionStorage.setItem(key, '1');
+    // শুভেচ্ছা অডিও: নিজে থেকে বাজার চেষ্টা করবে। ব্রাউজার/অ্যাপ আটকে দিলে বা welcome.mp3 না থাকলে চুপচাপ বাদ যাবে।
+    try {
+      welcomeAudio = new Audio('welcome.mp3');
+      const pr = welcomeAudio.play();
+      if (pr && pr.catch) pr.catch(() => {});
+    } catch(e) {}
   };
+  let welcomeAudio = null;
   window.closeWelcomePopup = ()=>{
     document.getElementById('welcome-backdrop').classList.remove('open');
+    try { if (welcomeAudio) { welcomeAudio.pause(); welcomeAudio.currentTime = 0; } } catch(e) {}
   };
 
   window.toggleEye = (inputId,btn)=>{const inp=document.getElementById(inputId);if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}else{inp.type='password';btn.textContent='👁️';}};
