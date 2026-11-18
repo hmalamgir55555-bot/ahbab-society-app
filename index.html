@@ -1815,7 +1815,11 @@
     sessionStorage.setItem(key, '1');
     // শুভেচ্ছা অডিও: নিজে থেকে বাজার চেষ্টা করবে। ব্রাউজার/অ্যাপ আটকে দিলে বা welcome.mp3 না থাকলে চুপচাপ বাদ যাবে।
     try {
-      welcomeAudio = new Audio('welcome.mp3');
+      welcomeAudio = new Audio('welcome.wav');
+      // welcome.wav না থাকলে welcome.mp3 চেষ্টা করবে; দুটোই না থাকলে চুপচাপ বাদ
+      welcomeAudio.onerror = () => {
+        try { welcomeAudio = new Audio('welcome.mp3'); const p2 = welcomeAudio.play(); if (p2 && p2.catch) p2.catch(() => {}); } catch(e) {}
+      };
       const pr = welcomeAudio.play();
       if (pr && pr.catch) pr.catch(() => {});
     } catch(e) {}
