@@ -245,10 +245,10 @@
   <div class="login-box">
     <div class="login-logo">আ</div>
     <div class="login-title">আহবাব বিজনেস সোসাইটি</div>
-    <div class="login-sub">আপনি কে?</div>
+    <div class="login-sub">লগইন করুন</div>
 
     <!-- Role Selection -->
-    <div id="role-select-section">
+    <div id="role-select-section" style="display:none;">
       <button class="login-btn" onclick="showAdminLogin()" style="margin-bottom:10px;background:var(--primary);">👑 অ্যাডমিন হিসেবে প্রবেশ</button>
       <button class="login-btn" onclick="showMemberLogin()" style="background:#2563eb;">👤 সদস্য হিসেবে প্রবেশ</button>
     </div>
@@ -267,7 +267,7 @@
     </div>
 
     <!-- Member Login (Email+Password) -->
-    <div id="member-login-section" style="display:none;">
+    <div id="member-login-section" style="display:block;">
       <div class="login-input-wrap">
         <input type="email" id="login-email" placeholder="ইমেইল ঠিকানা" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
@@ -276,9 +276,12 @@
         <button class="eye-btn" onclick="toggleEye('login-pwd',this)">👁️</button>
       </div>
       <button class="login-btn" id="login-btn" onclick="doLogin()">🔐 লগইন করুন</button>
-      <div style="text-align:center;margin-top:10px;display:flex;justify-content:space-between;">
-        <a href="#" onclick="showRoleSelect();return false;" style="font-size:13px;color:var(--muted);text-decoration:underline;">← ফিরে যান</a>
+      <div style="text-align:center;margin-top:10px;display:flex;justify-content:flex-end;">
         <a href="#" onclick="showForgotPassword();return false;" style="font-size:13px;color:var(--primary);font-weight:600;text-decoration:underline;">পাসওয়ার্ড ভুলে গেছেন?</a>
+      </div>
+      <div style="text-align:center;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">শুধু অ্যাডমিনদের জন্য (ঐচ্ছিক)</div>
+        <button class="login-btn" onclick="doGoogleLogin()" style="background:#ea4335;font-size:13px;padding:10px;">Google দিয়ে লগইন</button>
       </div>
     </div>
 
@@ -415,10 +418,12 @@
     <!-- Admin Management (Super Admin only) -->
     <div class="page" id="page-admins">
       <div class="section-title">🛡️ অ্যাডমিন ব্যবস্থাপনা</div>
-      <div style="background:#f0f9ff;border:1px solid #0ea5e9;border-radius:10px;padding:12px 14px;font-size:13px;color:#0369a1;margin-bottom:14px;">শুধু সুপার অ্যাডমিন নতুন অ্যাডমিন যোগ বা বাদ দিতে পারেন। নতুন অ্যাডমিন <strong>Google দিয়ে লগইন</strong> করলে পুরো অ্যাডমিনের সুবিধা পাবেন।</div>
+      <div style="background:#f0f9ff;border:1px solid #0ea5e9;border-radius:10px;padding:12px 14px;font-size:13px;color:#0369a1;margin-bottom:14px;">শুধু সুপার অ্যাডমিন নতুন অ্যাডমিন যোগ বা বাদ দিতে পারেন। নতুন অ্যাডমিন লগইন করলে পুরো অ্যাডমিনের সুবিধা পাবেন।</div>
       <div style="background:white;border-radius:14px;border:1px solid var(--border);padding:20px;margin-bottom:16px;">
         <h3 style="font-size:14px;font-weight:700;color:var(--primary);margin-bottom:12px;">➕ নতুন অ্যাডমিন যোগ করুন</h3>
-        <div class="form-group"><label>Gmail ঠিকানা *</label><input type="email" id="new-admin-email" placeholder="example@gmail.com"></div>
+        <div class="form-group"><label>ইমেইল ঠিকানা *</label><input type="email" id="new-admin-email" placeholder="example@gmail.com"></div>
+        <div class="form-group" style="margin-top:10px;"><label>পাসওয়ার্ড (কমপক্ষে ৬ অক্ষর)</label><input type="text" id="new-admin-pwd" placeholder="পাসওয়ার্ড দিলে ইমেইল-পাসওয়ার্ডে লগইন করা যাবে"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6;">• নতুন অ্যাডমিনের জন্য ইমেইল ও পাসওয়ার্ড দিন। সে সাধারণ লগইন ফর্মেই ঢুকবে।<br>• কোডের স্থায়ী অ্যাডমিনের (যাদের লগইন অ্যাকাউন্ট নেই) জন্যও এখানে ইমেইল ও পাসওয়ার্ড দিয়ে অ্যাকাউন্ট বানাতে পারবেন।<br>• পাসওয়ার্ড খালি রাখলে শুধু অ্যাডমিন তালিকায় যোগ হবে (Google দিয়ে লগইনের জন্য)।</div>
         <div style="margin-top:12px;"><button class="btn btn-primary btn-sm" onclick="addAdmin()">অ্যাডমিন বানান</button></div>
       </div>
       <div id="admin-list"></div>
@@ -881,18 +886,6 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Handle Google redirect result (after returning from Google sign-in page)
-  getRedirectResult(auth).then(async (result) => {
-    if (result && result.user) {
-      const email = result.user.email;
-      if (!['hmalamgir55555@gmail.com', 'sayedbintaj27@gmail.com', 'jafarsadikrafi@gmail.com', 'nomansiddique8688@gmail.com'].includes(email)) {
-        await signOut(auth);
-        document.getElementById('login-error').textContent = '❌ এই Gmail অ্যাকাউন্টটি অ্যাডমিন হিসেবে নিবন্ধিত নয়।';
-        document.getElementById('login-screen').classList.remove('hidden');
-      }
-    }
-  }).catch(e => { console.error('Redirect result error:', e); });
-
   // ADMIN EMAILS - এখানে Admin এর ইমেইল যোগ করুন
   const ADMIN_EMAILS = ['hmalamgir55555@gmail.com', 'sayedbintaj27@gmail.com', 'jafarsadikrafi@gmail.com', 'nomansiddique8688@gmail.com'];
   // সুপার অ্যাডমিন: শুধু এরাই অ্যাপ থেকে নতুন অ্যাডমিন যোগ/বাদ দিতে পারবেন (এখানে শুধু কোড বদলে পরিবর্তন করা যাবে)
@@ -912,6 +905,20 @@
       || ADMIN_EMAILS.map(x=>x.toLowerCase()).includes(e)
       || dynamicAdmins.some(a => (a.email||'').toLowerCase() === e);
   }
+
+  // Handle Google redirect result (after returning from Google sign-in page)
+  getRedirectResult(auth).then(async (result) => {
+    if (result && result.user) {
+      const email = result.user.email;
+      await loadAdmins(); // অ্যাপ থেকে যোগ করা অ্যাডমিনও গণ্য হবে
+      if (!isAdminEmail(email)) {
+        await signOut(auth);
+        document.getElementById('login-error').textContent = '❌ এই Gmail অ্যাকাউন্টটি অ্যাডমিন হিসেবে নিবন্ধিত নয়।';
+        document.getElementById('login-screen').classList.remove('hidden');
+      }
+    }
+  }).catch(e => { console.error('Redirect result error:', e); });
+
 
   let members = [];
   let payments = [];
@@ -1036,9 +1043,10 @@
   // LOGIN
   // Login UI helpers
   window.showRoleSelect = () => {
-    document.getElementById('role-select-section').style.display = 'block';
+    // এখন আলাদা "আপনি কে?" স্ক্রিন নেই, সবার জন্য একটাই লগইন ফর্ম
+    document.getElementById('role-select-section').style.display = 'none';
     document.getElementById('admin-login-section').style.display = 'none';
-    document.getElementById('member-login-section').style.display = 'none';
+    document.getElementById('member-login-section').style.display = 'block';
     document.getElementById('login-error').textContent = '';
   };
   window.showAdminLogin = () => {
@@ -1057,9 +1065,9 @@
 
   // Google Sign-In for Admin (redirect method - works on mobile)
   window.doGoogleLogin = async () => {
-    const btn = document.getElementById('google-login-btn');
+    const btn = document.getElementById('google-login-btn') || { };
     const errEl = document.getElementById('login-error');
-    btn.disabled = true; btn.textContent = 'Google-এ যাচ্ছে...'; errEl.textContent = '';
+    btn.disabled = true; btn.textContent = 'Google-এ যাচ্ছে...'; errEl.textContent = 'Google-এ নেওয়া হচ্ছে...';
     try {
       const provider = new GoogleAuthProvider();
       await signInWithRedirect(auth, provider);
@@ -1746,19 +1754,40 @@
   window.addAdmin = async () => {
     if (!isSuperAdmin) return showToast('শুধু সুপার অ্যাডমিন এটা করতে পারেন!','error');
     const input = document.getElementById('new-admin-email');
+    const pwdInput = document.getElementById('new-admin-pwd');
     const email = (input.value || '').trim().toLowerCase();
+    const pwd = (pwdInput.value || '').trim();
     if (!/^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/.test(email)) return showToast('সঠিক ইমেইল দিন!','error');
-    if (isAdminEmail(email)) return showToast('ইনি আগে থেকেই অ্যাডমিন!','error');
+    const already = isAdminEmail(email);
+    if (already && !pwd) return showToast('ইনি আগে থেকেই অ্যাডমিন! লগইন অ্যাকাউন্ট বানাতে পাসওয়ার্ড দিন।','error');
+    if (pwd && pwd.length < 6) return showToast('পাসওয়ার্ড কমপক্ষে ৬ অক্ষর দিন!','error');
+    let accountNote = '';
     try {
-      const data = { email, addedBy: currentUser.email, addedAt: new Date().toISOString() };
-      await setDoc(doc(db,'admins',email), data);
-      dynamicAdmins.push({ id: email, ...data });
-      input.value = '';
+      if (pwd) {
+        try {
+          const secondaryApp = initializeApp(firebaseConfig, 'secondary-' + Date.now());
+          const secondaryAuth = getAuth(secondaryApp);
+          await createUserWithEmailAndPassword(secondaryAuth, email, pwd);
+          await signOut(secondaryAuth);
+          accountNote = ' (লগইন অ্যাকাউন্টও তৈরি হয়েছে)';
+        } catch(authErr) {
+          if (authErr.code === 'auth/email-already-in-use') {
+            if (already) return showToast('এই ইমেইলের অ্যাকাউন্ট আগেই আছে। পাসওয়ার্ড ভুলে গেলে লগইন পেজে "পাসওয়ার্ড ভুলে গেছেন?" চাপুন।','error');
+            accountNote = ' (এই ইমেইলের অ্যাকাউন্ট আগেই ছিল, পাসওয়ার্ড বদলানো হয়নি)';
+          } else { throw authErr; }
+        }
+      }
+      if (!already) {
+        const data = { email, addedBy: currentUser.email, addedAt: new Date().toISOString() };
+        await setDoc(doc(db,'admins',email), data);
+        dynamicAdmins.push({ id: email, ...data });
+      }
+      input.value = ''; pwdInput.value = '';
       renderAdminList(); renderDataStats();
-      showToast(email + ' এখন অ্যাডমিন ✅','success');
+      showToast(already ? 'লগইন অ্যাকাউন্ট তৈরি হয়েছে ✅' : (email + ' এখন অ্যাডমিন ✅' + accountNote),'success');
     } catch(e) {
       console.error(e);
-      showToast(e.code==='permission-denied' ? 'অনুমতি নেই (Firestore rules-এ admins যোগ করতে হবে)' : 'যোগ করতে সমস্যা: '+(e.code||e.message),'error');
+      showToast(e.code==='permission-denied' ? 'অনুমতি নেই (Firestore rules দেখুন)' : 'যোগ করতে সমস্যা: '+(e.code||e.message),'error');
     }
   };
 
