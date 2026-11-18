@@ -862,6 +862,7 @@
       দিয়ে দিলে ভালো হতো না? 😆<br><br>
       সবাই ভালো থাকুন। ❤️
     </div>
+    <button class="login-btn" id="welcome-audio-btn" onclick="toggleWelcomeAudio()" style="background:#c9a96e;color:#0f2b4c;margin-bottom:10px;">🔊 শুনুন</button>
     <button class="login-btn" onclick="closeWelcomePopup()">ঠিক আছে 👍</button>
   </div>
 </div>
@@ -1813,21 +1814,31 @@
     if (sessionStorage.getItem(key)) return;
     document.getElementById('welcome-backdrop').classList.add('open');
     sessionStorage.setItem(key, '1');
-    // শুভেচ্ছা অডিও: নিজে থেকে বাজার চেষ্টা করবে। ব্রাউজার/অ্যাপ আটকে দিলে বা welcome.mp3 না থাকলে চুপচাপ বাদ যাবে।
+  };
+  // শুভেচ্ছা অডিও: "🔊 শুনুন" বাটনে ট্যাপ করলে বাজবে (welcome.wav)
+  let welcomeAudio = null;
+  function resetWelcomeAudioBtn() {
+    const b = document.getElementById('welcome-audio-btn');
+    if (b) b.textContent = '🔊 শুনুন';
+  }
+  window.toggleWelcomeAudio = () => {
+    const btn = document.getElementById('welcome-audio-btn');
+    if (welcomeAudio && !welcomeAudio.paused) {
+      welcomeAudio.pause(); welcomeAudio.currentTime = 0; resetWelcomeAudioBtn(); return;
+    }
     try {
       welcomeAudio = new Audio('welcome.wav');
-      // welcome.wav না থাকলে welcome.mp3 চেষ্টা করবে; দুটোই না থাকলে চুপচাপ বাদ
-      welcomeAudio.onerror = () => {
-        try { welcomeAudio = new Audio('welcome.mp3'); const p2 = welcomeAudio.play(); if (p2 && p2.catch) p2.catch(() => {}); } catch(e) {}
-      };
+      welcomeAudio.onended = resetWelcomeAudioBtn;
+      welcomeAudio.onerror = () => { resetWelcomeAudioBtn(); showToast('অডিও চালানো যায়নি','error'); };
+      btn.textContent = '⏸ থামান';
       const pr = welcomeAudio.play();
-      if (pr && pr.catch) pr.catch(() => {});
-    } catch(e) {}
+      if (pr && pr.catch) pr.catch(() => { resetWelcomeAudioBtn(); showToast('অডিও চালানো যায়নি','error'); });
+    } catch(e) { resetWelcomeAudioBtn(); }
   };
-  let welcomeAudio = null;
   window.closeWelcomePopup = ()=>{
     document.getElementById('welcome-backdrop').classList.remove('open');
     try { if (welcomeAudio) { welcomeAudio.pause(); welcomeAudio.currentTime = 0; } } catch(e) {}
+    resetWelcomeAudioBtn();
   };
 
   window.toggleEye = (inputId,btn)=>{const inp=document.getElementById(inputId);if(inp.type==='password'){inp.type='text';btn.textContent='🙈';}else{inp.type='password';btn.textContent='👁️';}};
